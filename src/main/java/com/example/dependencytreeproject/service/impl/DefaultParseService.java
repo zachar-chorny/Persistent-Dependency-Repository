@@ -40,6 +40,9 @@ public class DefaultParseService implements ParseService {
         try {
             model = reader.read(new FileReader(file));
             model.setPomFile(file);
+            if(model.getGroupId() == null) {
+                model.setGroupId(model.getParent().getGroupId());
+            }
         } catch (XmlPullParserException | IOException ignored) {
             return Optional.empty();
         }
@@ -64,6 +67,7 @@ public class DefaultParseService implements ParseService {
             } catch (InterruptedException | ExecutionException ignored) {
             }
         }
+        executorService.shutdown();
         return models;
     }
 
