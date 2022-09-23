@@ -5,6 +5,7 @@ import com.example.dependencytreeproject.model.Setting;
 import com.example.dependencytreeproject.service.ParseService;
 import lombok.RequiredArgsConstructor;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Parent;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.springframework.stereotype.Service;
@@ -40,8 +41,12 @@ public class DefaultParseService implements ParseService {
         try {
             model = reader.read(new FileReader(file));
             model.setPomFile(file);
+            Parent parent = model.getParent();
             if(model.getGroupId() == null) {
-                model.setGroupId(model.getParent().getGroupId());
+                model.setGroupId(parent.getGroupId());
+            }
+            if(model.getVersion() == null) {
+                model.setVersion(parent.getVersion());
             }
         } catch (XmlPullParserException | IOException ignored) {
             return Optional.empty();

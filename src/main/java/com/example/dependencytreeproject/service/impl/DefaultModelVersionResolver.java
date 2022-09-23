@@ -14,6 +14,7 @@ import java.util.Map;
 public class DefaultModelVersionResolver implements ModelVersionResolver {
     private static final String REPLACE_REGEX = "[${}]";
     private static final String VERSION_REGEX = "\\$\\{.+}";
+    private static final String PROJECT_VERSION = "${project.version}";
     private List<TreeDocument> actualTreeDocuments;
 
     @Override
@@ -35,6 +36,8 @@ public class DefaultModelVersionResolver implements ModelVersionResolver {
         String version = dependency.getVersion();
         if (version == null) {
             version = getVersionFromParent(dependency, model, treeDocument);
+        }else if(version.equals(PROJECT_VERSION)) {
+            return model.getVersion();
         }
         return getVersionFromProperties(model, version);
     }

@@ -49,6 +49,7 @@ public class DefaultModelService implements ModelService {
         return Model.builder().artifactId(model.getArtifactId())
                 .parent(parent)
                 .groupId(model.getGroupId())
+                .version(model.getVersion())
                 .dependencies(dependencies)
                 .dependenciesFromManagement(dependenciesFromManagement)
                 .properties(propertiesMap)

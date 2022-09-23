@@ -13,6 +13,7 @@ import java.util.Map;
 public class Model {
     private String groupId;
     private String artifactId;
+    private String version;
     private String parent;
     private List<DependencyNode> dependencies;
     private List<DependencyNode> dependenciesFromManagement;
