@@ -1,10 +1,11 @@
 package com.example.dependencytreeproject.service;
 
-import com.example.dependencytreeproject.model.document.TreeDocument;
 
-import java.util.List;
+import org.apache.maven.model.Model;
+
+import java.util.Map;
 
 public interface ModelVersionResolver {
 
-    void resolveVersions(List<TreeDocument> treeDocuments);
+    void resolveVersions(Map<String, Map<String, Model>> projects);
 }

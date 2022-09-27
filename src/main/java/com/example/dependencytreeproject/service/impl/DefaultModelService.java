@@ -14,16 +14,7 @@ import java.util.*;
 public class DefaultModelService implements ModelService {
     @Override
     public Model parseModel(org.apache.maven.model.Model model) {
-        Map<String, String> propertiesMap = null;
         List<DependencyNode> dependencies = null;
-        List<DependencyNode> dependenciesFromManagement = null;
-        if (!model.getProperties().isEmpty()) {
-            propertiesMap = new HashMap<>();
-            Properties properties = model.getProperties();
-            for (String name : properties.stringPropertyNames()) {
-                propertiesMap.put(name, properties.getProperty(name));
-            }
-        }
         List<Dependency> modelDependencies = model.getDependencies();
         if (!modelDependencies.isEmpty()) {
             dependencies = new ArrayList<>();
@@ -35,9 +26,11 @@ public class DefaultModelService implements ModelService {
         if (dependencyManagement != null) {
             List<Dependency> modelDependenciesFromManagement = dependencyManagement.getDependencies();
             if (!modelDependenciesFromManagement.isEmpty()) {
-                dependenciesFromManagement = new ArrayList<>();
+                if(dependencies == null){
+                    dependencies = new ArrayList<>();
+                }
                 for (Dependency dependency : modelDependenciesFromManagement) {
-                    dependenciesFromManagement.add(parseToDependencyNode(dependency));
+                    dependencies.add(parseToDependencyNode(dependency));
                 }
             }
         }
@@ -51,8 +44,6 @@ public class DefaultModelService implements ModelService {
                 .groupId(model.getGroupId())
                 .version(model.getVersion())
                 .dependencies(dependencies)
-                .dependenciesFromManagement(dependenciesFromManagement)
-                .properties(propertiesMap)
                 .build();
     }
 

@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
-import java.util.Map;
 
 @Builder
 @Data
@@ -16,6 +15,4 @@ public class Model {
     private String version;
     private String parent;
     private List<DependencyNode> dependencies;
-    private List<DependencyNode> dependenciesFromManagement;
-    private Map<String, String> properties;
 }
