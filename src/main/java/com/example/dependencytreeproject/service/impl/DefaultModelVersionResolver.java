@@ -26,16 +26,22 @@ public class DefaultModelVersionResolver implements ModelVersionResolver {
         for (Map.Entry<String, Map<String, Model>> project : projects.entrySet()) {
             for (Map.Entry<String, Model> models : project.getValue().entrySet()) {
                 Model model = models.getValue();
-                if(model.getVersion() == null) {
+                if (model.getVersion() == null) {
                     model.setVersion(initializeVersion(model, project));
                 }
             }
         }
         for (Map.Entry<String, Map<String, Model>> project : projects.entrySet()) {
             for (Map.Entry<String, Model> models : project.getValue().entrySet()) {
+                if (models.getKey().equals("apic-em-inventory-manager-service-das-client")) {
+                    System.out.println();
+                }
                 List<Dependency> dependencies = models.getValue().getDependencies();
                 if (dependencies != null) {
                     for (Dependency dependency : dependencies) {
+                        if (dependency.getArtifactId().equals("maglev-adapter-sdk")) {
+                            System.out.println();
+                        }
                         dependency.setVersion(getVersion(dependency, models.getValue(), project));
                     }
                 }
@@ -50,10 +56,10 @@ public class DefaultModelVersionResolver implements ModelVersionResolver {
     }
 
     private String initializeVersion(Model model,
-                                   Map.Entry<String, Map<String, Model>> project) {
+                                     Map.Entry<String, Map<String, Model>> project) {
         actualProject = project;
         String version = model.getVersion();
-        while(version == null) {
+        while (version == null) {
             Parent parent = model.getParent();
             model = getParent(parent, actualProject);
             version = model.getVersion();
@@ -69,12 +75,10 @@ public class DefaultModelVersionResolver implements ModelVersionResolver {
             return model.getVersion();
         }
         version = getVersionFromProperties(model, version, dependency);
-        if (version == null) {
-            Model dependencyModel = getSingleModel(dependency.getArtifactId(), project);
-            if(dependencyModel != null) {
-                return dependencyModel.getVersion();
-            }
-        }else if (version.matches(VERSION_REGEX)) {
+        if(version == null) {
+            System.out.println();
+        }
+        if (version != null && version.matches(VERSION_REGEX)) {
             return getVersionFromParent(dependency, model, project);
         }
         return version;
@@ -149,7 +153,10 @@ public class DefaultModelVersionResolver implements ModelVersionResolver {
                 DependencyManagement childManagement = dependencyModel.getDependencyManagement();
                 if (childManagement != null) {
                     for (Dependency dep : childManagement.getDependencies()) {
-                        version = findVersion(version, dependency, dep, dependencyModel);
+                        String parentVersion = findVersion(version, dependency, dep, dependencyModel);
+                        if (parentVersion != null) {
+                            return parentVersion;
+                        }
                     }
                 }
             }
@@ -160,7 +167,8 @@ public class DefaultModelVersionResolver implements ModelVersionResolver {
 
     private String findVersion(String version, Dependency mainDependency,
                                Dependency dependency, Model model) {
-        if (dependency.getArtifactId().equals(mainDependency.getArtifactId())) {
+        if (dependency.getArtifactId().equals(mainDependency.getArtifactId())
+                && dependency.getVersion() != null) {
             version = dependency.getVersion();
         }
         return getVersionFromProperties(model, version, dependency);
@@ -177,10 +185,16 @@ public class DefaultModelVersionResolver implements ModelVersionResolver {
             }
         }
         if (version == null) {
-            String property = dependency.getArtifactId().replaceAll("-", ".") + VERSION;
+            String defaultProperty = dependency.getArtifactId() + VERSION;
+            String updatedProperty = dependency.getArtifactId().replaceAll("-", ".") + VERSION;
             if (model.getProperties() != null) {
                 String propertiesVersion = model.getProperties()
-                        .getProperty(property);
+                        .getProperty(defaultProperty);
+                if (propertiesVersion != null) {
+                    return propertiesVersion;
+                }
+                propertiesVersion = model.getProperties()
+                        .getProperty(updatedProperty);
                 if (propertiesVersion != null) {
                     return propertiesVersion;
                 }
